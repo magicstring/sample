@@ -1,0 +1,21 @@
+{
+  "name": "Grey Pet Care",
+  "screens": [
+    {
+      "file": "screens/login.html",
+      "title": "Login"
+    },
+    {
+      "file": "screens/pets.html",
+      "title": "Pets"
+    },
+    {
+      "file": "screens/boarding.html",
+      "title": "Boarding"
+    },
+    {
+      "file": "screens/history.html",
+      "title": "Pet history"
+    }
+  ]
+}
