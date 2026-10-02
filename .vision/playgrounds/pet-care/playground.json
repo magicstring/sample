@@ -1,0 +1,33 @@
+{
+  "name": "Grey's Pet Care Services",
+  "screens": [
+    {
+      "file": "screens/login.html",
+      "title": "Login"
+    },
+    {
+      "file": "screens/dashboard.html",
+      "title": "Dashboard"
+    },
+    {
+      "file": "screens/pets.html",
+      "title": "Pets"
+    },
+    {
+      "file": "screens/boarding.html",
+      "title": "Boarding"
+    },
+    {
+      "file": "screens/daycare.html",
+      "title": "Day Care"
+    },
+    {
+      "file": "screens/history.html",
+      "title": "Pet history"
+    },
+    {
+      "file": "screens/reports.html",
+      "title": "Transactions"
+    }
+  ]
+}
