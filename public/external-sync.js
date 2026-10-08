@@ -1,17 +1,16 @@
 (() => {
   if (typeof window.profile !== 'function' || typeof window.modal !== 'function') return;
 
-  const pendingKey = 'grey-external-profile-updates';
   const originalProfile = window.profile;
+  let pending = [];
   let pollTimer;
 
   function pendingUpdates() {
-    try { return JSON.parse(localStorage.getItem(pendingKey) || '[]'); }
-    catch { return []; }
+    return pending;
   }
 
   function savePending(items) {
-    localStorage.setItem(pendingKey, JSON.stringify(items));
+    pending = items;
   }
 
   window.profile = function profileWithDeviceOptions(id) {
@@ -64,9 +63,7 @@
     const at = result.completedAt || new Date().toISOString();
     const updatedBy = {name: result.updatedBy};
     const next = {...current, ...result.profile, id: current.id, type: 'Dog', updatedAt: at, updatedBy, registrationSnapshot: current.registrationSnapshot || cleanProfile(current)};
-    db.pets = db.pets.map(existing => existing.id === current.id ? next : existing);
-    db.history.push({id: Date.now(), petId: current.id, event: 'Profile updated', at, updatedBy, profile: cleanProfile(next)});
-    save();
+    try { db = legacyRequest('GET', 'state'); } catch { return; }
     savePending(pendingUpdates().filter(entry => entry.token !== item.token));
     if (PAGE === 'pets') renderPets();
     toast(`Profile updated by ${result.updatedBy}.`);
