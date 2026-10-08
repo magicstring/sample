@@ -1,16 +1,17 @@
 (() => {
   if (typeof window.profile !== 'function' || typeof window.modal !== 'function') return;
 
+  const pendingKey = 'grey-external-profile-updates';
   const originalProfile = window.profile;
-  let pending = [];
   let pollTimer;
 
   function pendingUpdates() {
-    return pending;
+    try { return JSON.parse(localStorage.getItem(pendingKey) || '[]'); }
+    catch { return []; }
   }
 
   function savePending(items) {
-    pending = items;
+    localStorage.setItem(pendingKey, JSON.stringify(items));
   }
 
   window.profile = function profileWithDeviceOptions(id) {
@@ -57,13 +58,21 @@
     }, 1000);
   }
 
-  function applyCompleted(item, result) {
+  async function applyCompleted(item, result) {
     const current = pet(item.petId);
     if (!current) return;
     const at = result.completedAt || new Date().toISOString();
     const updatedBy = {name: result.updatedBy};
     const next = {...current, ...result.profile, id: current.id, type: 'Dog', updatedAt: at, updatedBy, registrationSnapshot: current.registrationSnapshot || cleanProfile(current)};
-    try { db = legacyRequest('GET', 'state'); } catch { return; }
+    try {
+      const strip = window.stripId || (o => { const c = {...o}; delete c.id; return c; });
+      await window.api('/api/records/' + current.id, {method: 'PATCH', body: {data: strip(next)}});
+      await window.addHistory({petId: current.id, event: 'Profile updated', at, updatedBy, profile: cleanProfile(next)});
+    } catch (e) {
+      toast('Could not save the profile update from the other device.');
+      return;
+    }
+    db.pets = db.pets.map(existing => existing.id === current.id ? next : existing);
     savePending(pendingUpdates().filter(entry => entry.token !== item.token));
     if (PAGE === 'pets') renderPets();
     toast(`Profile updated by ${result.updatedBy}.`);
