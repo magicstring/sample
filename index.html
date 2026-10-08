@@ -129,7 +129,7 @@ async function init(){
 let session=null;
 try{session=await api('/api/session')}catch(e){let main=document.querySelector('main');if(main)main.innerHTML='<section class="panel"><h1>Cannot reach the server</h1><p style="margin-top:16px">Start the Grey server and reload this page.</p></section>';return}
 CU=session.user||null;
-if(PAGE==='login'){if(CU){location.href=(landingPage(CU)||'pets')+'.html';return}if(session.canSetup)showSetup();else wireLogin();return}
+if(PAGE==='login'){if(session.canSetup)showSetup();else wireLogin();return}
 if(!CU){location.href='login.html';return}
 try{await loadDb()}catch(e){let main=document.querySelector('main');if(main)main.innerHTML='<section class="panel"><h1>Could not load data</h1><p style="margin-top:16px">'+esc(e.message)+'</p></section>';return}
 ensureSettings();
