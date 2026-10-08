@@ -10,6 +10,9 @@ ALTER TABLE grey_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'Empl
 CREATE TABLE IF NOT EXISTS grey_sessions(token TEXT PRIMARY KEY,user_id INTEGER REFERENCES grey_users(id) ON DELETE CASCADE,expires TIMESTAMPTZ NOT NULL);
 CREATE TABLE IF NOT EXISTS grey_records(id SERIAL PRIMARY KEY,kind TEXT NOT NULL,data JSONB NOT NULL,created_at TIMESTAMPTZ DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS grey_external_updates(token_hash TEXT PRIMARY KEY,pet_id TEXT NOT NULL,profile JSONB NOT NULL,result JSONB,updater_name TEXT,created_at TIMESTAMPTZ DEFAULT NOW(),expires_at TIMESTAMPTZ NOT NULL,completed_at TIMESTAMPTZ);`);
+await pool.query(`UPDATE grey_users SET role='Super Admin'
+WHERE id=(SELECT id FROM grey_users ORDER BY id LIMIT 1)
+AND NOT EXISTS (SELECT 1 FROM grey_users WHERE role='Super Admin')`);
 const hash=t=>createHash('sha256').update(t).digest('hex');
 const hashPassword=pw=>{const salt=randomBytes(16).toString('hex');return salt+':'+scryptSync(pw,salt,64).toString('hex')};
 const verifyPassword=(pw,stored)=>{const [salt,h]=String(stored||'').split(':');if(!salt||!h)return false;try{return timingSafeEqual(Buffer.from(h,'hex'),scryptSync(pw,salt,64))}catch{return false}};
